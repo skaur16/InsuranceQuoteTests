@@ -1,0 +1,196 @@
+﻿using NUnit.Framework;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+using System;
+
+namespace InsuranceQuoteTests
+{
+    [TestFixture]
+    public class InsuranceQuoteTests : IDisposable
+    {
+        private IWebDriver driver;
+        private WebDriverWait wait;
+        private bool disposed = false;
+
+        [SetUp]
+        public void Setup()
+        {
+            var options = new ChromeOptions();
+            options.AddArguments("--start-maximized", "--disable-notifications");
+            driver = new ChromeDriver(options);
+
+            driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(30);
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(0);
+            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+
+            driver.Navigate().GoToUrl("http://localhost/prog8170a04/getQuote.html");
+            wait.Until(d => d.FindElement(By.Id("btnSubmit")).Displayed);
+        }
+
+        private void FillPersonalInfo(bool valid = true)
+        {
+            // Arrange: Fill personal information
+            driver.FindElement(By.Id("firstName")).SendKeys("John");
+            driver.FindElement(By.Id("lastName")).SendKeys("Doe");
+            driver.FindElement(By.Id("address")).SendKeys("123 Main St");
+            driver.FindElement(By.Id("city")).SendKeys("Waterloo");
+
+            if (valid)
+            {
+                driver.FindElement(By.Id("postalCode")).SendKeys("N2L 3G1");  // Fixed postal code format
+                driver.FindElement(By.Id("phone")).SendKeys("519-555-1234");
+                driver.FindElement(By.Id("email")).SendKeys("john.doe@example.com");  // Fixed email format
+            }
+        }
+
+        private void FillDrivingInfo(string age, string experience, string accidents)
+        {
+            // Arrange: Fill driving information
+            driver.FindElement(By.Id("age")).Clear();
+            if (!string.IsNullOrEmpty(age)) driver.FindElement(By.Id("age")).SendKeys(age);
+
+            driver.FindElement(By.Id("experience")).Clear();
+            if (!string.IsNullOrEmpty(experience)) driver.FindElement(By.Id("experience")).SendKeys(experience);
+
+            driver.FindElement(By.Id("accidents")).Clear();
+            if (!string.IsNullOrEmpty(accidents)) driver.FindElement(By.Id("accidents")).SendKeys(accidents);
+        }
+
+        private void SubmitForm()
+        {
+            // Act: Submit the form
+            driver.FindElement(By.Id("btnSubmit")).Click();
+        }
+
+        private string GetQuoteResult()
+        {
+            // Return the quote result after waiting
+            return wait.Until(d => d.FindElement(By.Id("finalQuote")).GetAttribute("value"));
+        }
+
+        private string GetValidationMessage(string fieldId)
+        {
+            try
+            {
+                var field = driver.FindElement(By.Id(fieldId));
+                var html5Message = field.GetAttribute("validationMessage");
+                if (!string.IsNullOrEmpty(html5Message)) return html5Message;
+
+                var classAttribute = field.GetAttribute("class");
+                if (classAttribute.Contains("error") || classAttribute.Contains("invalid"))
+                    return "Invalid field";
+
+                return string.Empty;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        // Test 1: Valid Data = $5500 Quote
+        [Test]
+        public void InsuranceQuote01_ValidData_Quote5500()
+        {
+            // Arrange
+            FillPersonalInfo();
+            FillDrivingInfo("24", "3", "0");
+
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetQuoteResult(), Is.EqualTo("$5500"));
+        }
+
+        // Test 2: 4 Accidents = Insurance Denied
+        [Test]
+        public void InsuranceQuote02_InsuranceDenied_4Accidents()
+        {
+            // Arrange
+            FillPersonalInfo();
+            FillDrivingInfo("25", "3", "4");
+
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetQuoteResult(),
+                Is.EqualTo("No Insurance for you!!  Too many accidents - go take a course!"));
+        }
+
+        // Test 3: Valid With Discount = $3905 Quote
+        [Test]
+        public void InsuranceQuote03_ValidWithDiscount_Quote3905()
+        {
+            // Arrange
+            FillPersonalInfo();
+            FillDrivingInfo("35", "9", "2");
+
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetQuoteResult(), Is.EqualTo("$3905"));
+        }
+
+        // Test 4: Invalid Phone Number = Error
+        [Test]
+        public void InsuranceQuote04_InvalidPhoneNumber_Error()
+        {
+            // Arrange
+            FillPersonalInfo(false);
+            driver.FindElement(By.Id("postalCode")).SendKeys("N2L 3G1");
+            driver.FindElement(By.Id("phone")).SendKeys("123");  
+            driver.FindElement(By.Id("email")).SendKeys("john.doe@example.com");
+            FillDrivingInfo("27", "3", "0");
+
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetValidationMessage("phone"), Is.Not.Empty);
+        }
+
+        // Test 5: Invalid Email = Error
+        [Test]
+        public void InsuranceQuote05_InvalidEmail_Error()
+        {
+            // Arrange
+            FillPersonalInfo(false);
+            driver.FindElement(By.Id("postalCode")).SendKeys("N2L 3G1");
+            driver.FindElement(By.Id("phone")).SendKeys("519-555-1234");
+            driver.FindElement(By.Id("email")).SendKeys("Skaur@gmail.com");  
+            FillDrivingInfo("28", "3", "0");
+
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetValidationMessage("email"), Is.Not.Empty);
+        }
+
+
+
+        [TearDown]
+        public void Teardown()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                try
+                {
+                    driver?.Quit();
+                    driver?.Dispose();
+                }
+                catch { }
+                disposed = true;
+            }
+        }
+    }
+}
