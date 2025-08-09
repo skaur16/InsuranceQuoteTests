@@ -135,6 +135,7 @@ namespace InsuranceQuoteTests
             Assert.That(GetQuoteResult(), Is.EqualTo("$3905"));
         }
 
+
         // Test 4: Invalid Phone Number = Error
         [Test]
         public void InsuranceQuote04_InvalidPhoneNumber_Error()
