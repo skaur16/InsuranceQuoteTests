@@ -311,7 +311,7 @@ namespace InsuranceQuoteTests
                 Is.EqualTo("No Insurance for you!! Driver Age / Experience Not Correct"));
         }
 
-        // Test 15: Valid Data → $2840 Quote
+        // Test 15: Valid Data = $2840 Quote
         [Test]
         public void InsuranceQuote15_ValidData_Quote2840()
         {
