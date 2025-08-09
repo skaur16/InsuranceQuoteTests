@@ -31,16 +31,16 @@ namespace InsuranceQuoteTests
         private void FillPersonalInfo(bool valid = true)
         {
             // Arrange: Fill personal information
-            driver.FindElement(By.Id("firstName")).SendKeys("John");
-            driver.FindElement(By.Id("lastName")).SendKeys("Doe");
+            driver.FindElement(By.Id("firstName")).SendKeys("Sharan");
+            driver.FindElement(By.Id("lastName")).SendKeys("Kaur");
             driver.FindElement(By.Id("address")).SendKeys("123 Main St");
             driver.FindElement(By.Id("city")).SendKeys("Waterloo");
 
             if (valid)
             {
-                driver.FindElement(By.Id("postalCode")).SendKeys("N2L 3G1");  // Fixed postal code format
+                driver.FindElement(By.Id("postalCode")).SendKeys("N2L 3G1");  
                 driver.FindElement(By.Id("phone")).SendKeys("519-555-1234");
-                driver.FindElement(By.Id("email")).SendKeys("john.doe@example.com");  // Fixed email format
+                driver.FindElement(By.Id("email")).SendKeys("skaur@gmail.com");  
             }
         }
 
@@ -89,7 +89,7 @@ namespace InsuranceQuoteTests
             }
         }
 
-        // Test 1: Valid Data = $5500 Quote
+        // Test 1: Valid Data 
         [Test]
         public void InsuranceQuote01_ValidData_Quote5500()
         {
@@ -104,7 +104,7 @@ namespace InsuranceQuoteTests
             Assert.That(GetQuoteResult(), Is.EqualTo("$5500"));
         }
 
-        // Test 2: 4 Accidents = Insurance Denied
+        // Test 2: 4 Accidents 
         [Test]
         public void InsuranceQuote02_InsuranceDenied_4Accidents()
         {
@@ -120,7 +120,7 @@ namespace InsuranceQuoteTests
                 Is.EqualTo("No Insurance for you!!  Too many accidents - go take a course!"));
         }
 
-        // Test 3: Valid With Discount = $3905 Quote
+        // Test 3: Valid With Discount 
         [Test]
         public void InsuranceQuote03_ValidWithDiscount_Quote3905()
         {
@@ -136,7 +136,7 @@ namespace InsuranceQuoteTests
         }
 
 
-        // Test 4: Invalid Phone Number = Error
+        // Test 4: Invalid Phone Number 
         [Test]
         public void InsuranceQuote04_InvalidPhoneNumber_Error()
         {
@@ -144,7 +144,7 @@ namespace InsuranceQuoteTests
             FillPersonalInfo(false);
             driver.FindElement(By.Id("postalCode")).SendKeys("N2L 3G1");
             driver.FindElement(By.Id("phone")).SendKeys("123");  
-            driver.FindElement(By.Id("email")).SendKeys("john.doe@example.com");
+            driver.FindElement(By.Id("email")).SendKeys("skaur@gmail.com");
             FillDrivingInfo("27", "3", "0");
 
             // Act
@@ -172,7 +172,7 @@ namespace InsuranceQuoteTests
             Assert.That(GetValidationMessage("email"), Is.Not.Empty);
         }
 
-        // Test 6: Invalid Postal Code = Error
+        // Test 6: Invalid Postal Code 
         [Test]
         public void InsuranceQuote06_InvalidPostalCode_Error()
         {
@@ -220,7 +220,7 @@ namespace InsuranceQuoteTests
             Assert.That(GetValidationMessage("accidents"), Is.Not.Empty);
         }
 
-        // Test 9: Experience Omitted = Error
+        // Test 9: Experience
         [Test]
         public void InsuranceQuote09_ExperienceOmitted_Error()
         {
@@ -235,7 +235,7 @@ namespace InsuranceQuoteTests
             Assert.That(GetValidationMessage("experience"), Is.Not.Empty);
         }
 
-        // Test 10: Minimum Age (16) = $7000 Quote
+        // Test 10: Minimum Age (16) 
         [Test]
         public void InsuranceQuote10_MinimumAge_Quote7000()
         {
