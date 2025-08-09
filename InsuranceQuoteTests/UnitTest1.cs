@@ -172,7 +172,85 @@ namespace InsuranceQuoteTests
             Assert.That(GetValidationMessage("email"), Is.Not.Empty);
         }
 
+        // Test 6: Invalid Postal Code = Error
+        [Test]
+        public void InsuranceQuote06_InvalidPostalCode_Error()
+        {
+            // Arrange
+            FillPersonalInfo(false);
+            driver.FindElement(By.Id("postalCode")).SendKeys("12345");
+            driver.FindElement(By.Id("phone")).SendKeys("519-555-1234");
+            driver.FindElement(By.Id("email")).SendKeys("Skaur@gmail.com");
+            FillDrivingInfo("35", "15", "1");
 
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetValidationMessage("postalCode"), Is.Not.Empty);
+        }
+
+        // Test 7: Age Omitted = Error
+        [Test]
+        public void InsuranceQuote07_AgeOmitted_Error()
+        {
+            // Arrange
+            FillPersonalInfo();
+            FillDrivingInfo("", "5", "0");
+
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetValidationMessage("age"), Is.Not.Empty);
+        }
+
+        // Test 8: Accidents Omitted = Error
+        [Test]
+        public void InsuranceQuote08_AccidentsOmitted_Error()
+        {
+            // Arrange
+            FillPersonalInfo();
+            FillDrivingInfo("37", "8", "");
+
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetValidationMessage("accidents"), Is.Not.Empty);
+        }
+
+        // Test 9: Experience Omitted = Error
+        [Test]
+        public void InsuranceQuote09_ExperienceOmitted_Error()
+        {
+            // Arrange
+            FillPersonalInfo();
+            FillDrivingInfo("45", "", "0");
+
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetValidationMessage("experience"), Is.Not.Empty);
+        }
+
+        // Test 10: Minimum Age (16) = $7000 Quote
+        [Test]
+        public void InsuranceQuote10_MinimumAge_Quote7000()
+        {
+            // Arrange
+            FillPersonalInfo();
+            FillDrivingInfo("16", "0", "0");
+
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetQuoteResult(), Is.EqualTo("$7000"));
+        }
+
+     
 
         [TearDown]
         public void Teardown()
