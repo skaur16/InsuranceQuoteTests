@@ -250,7 +250,81 @@ namespace InsuranceQuoteTests
             Assert.That(GetQuoteResult(), Is.EqualTo("$7000"));
         }
 
-     
+        // Test 11: Age 30 with 2 Years Exp = $3905 Quote
+        [Test]
+        public void InsuranceQuote11_Age30_2YearsExp_Quote3905()
+        {
+            // Arrange
+            FillPersonalInfo();
+            FillDrivingInfo("30", "2", "1");
+
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetQuoteResult(), Is.EqualTo("$3905"));
+        }
+
+        // Test 12: Max Experience Difference = $2840 Quote
+        [Test]
+        public void InsuranceQuote12_MaxExperienceDiff_Quote2840()
+        {
+            // Arrange
+            FillPersonalInfo();
+            FillDrivingInfo("45", "29", "1");
+
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetQuoteResult(), Is.EqualTo("$2840"));
+        }
+
+        // Test 13: Invalid Age (15) = Error
+        [Test]
+        public void InsuranceQuote13_InvalidAge15_Error()
+        {
+            // Arrange
+            FillPersonalInfo();
+            FillDrivingInfo("15", "0", "0");
+
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetValidationMessage("age"), Is.Not.Empty);
+        }
+
+        // Test 14: Invalid Experience = Error
+        [Test]
+        public void InsuranceQuote14_InvalidExperience_Error()
+        {
+            // Arrange
+            FillPersonalInfo();
+            FillDrivingInfo("20", "5", "0");
+
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetQuoteResult(),
+                Is.EqualTo("No Insurance for you!! Driver Age / Experience Not Correct"));
+        }
+
+        // Test 15: Valid Data → $2840 Quote
+        [Test]
+        public void InsuranceQuote15_ValidData_Quote2840()
+        {
+            // Arrange
+            FillPersonalInfo();
+            FillDrivingInfo("40", "10", "2");
+
+            // Act
+            SubmitForm();
+
+            // Assert
+            Assert.That(GetQuoteResult(), Is.EqualTo("$2840"));
+        }
 
         [TearDown]
         public void Teardown()
